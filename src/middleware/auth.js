@@ -20,13 +20,10 @@ const isAuthenticated = async (req, res, next) => {
 
 const isAdmin = async (req, res, next) => {
   try {
-    const token = req.headers.authorization;
-    if (!token) {
+    if (!req.user) {
       return res.status(401).json({ success: false, message: "Not logged in" });
     }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded._id);
-    if (req.user.role !== "user") {
+    if (req.user.role !== "admin") {
       return res
         .status(401)
         .json({ success: false, message: "Not authorized" });
@@ -39,13 +36,10 @@ const isAdmin = async (req, res, next) => {
 
 const isUser = async (req, res, next) => {
   try {
-    const token = req.headers.authorization;
-    if (!token) {
+    if (!req.user) {
       return res.status(401).json({ success: false, message: "Not logged in" });
     }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded._id);
-    if (req.user.role !== "admin") {
+    if (req.user.role !== "user") {
       return res
         .status(401)
         .json({ success: false, message: "Not authorized" });
