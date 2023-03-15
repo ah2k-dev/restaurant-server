@@ -120,10 +120,12 @@ const login = async (req, res) => {
       });
     }
     jwtToken = user.getJWTToken();
+    delete user.password;
     res.status(200).json({
       success: true,
       message: "Logged in successfully",
       token: jwtToken,
+      user: user,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

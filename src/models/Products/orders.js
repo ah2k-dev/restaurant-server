@@ -6,9 +6,22 @@ const orderSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "user",
   },
-  products: {
-    type: [Schema.Types.ObjectId],
-    ref: "products",
+  products: [
+    {
+      product: {
+        type: Schema.Types.ObjectId,
+        ref: "products",
+      },
+      quantity: {
+        type: Number,
+      },
+      price: {
+        type: Number,
+      },
+    },
+  ],
+  shippingAddress: {
+    type: String,
   },
   totalPrice: {
     type: Number,
@@ -16,7 +29,7 @@ const orderSchema = new Schema({
   status: {
     type: String,
     default: "paymentPending",
-    enum: ["paymentPending", "pending", "dispatched", "delivered"],
+    enum: ["paymentPending", "pending", "cancelled", "dispatched", "delivered"],
   },
   createdAt: {
     type: Date,
