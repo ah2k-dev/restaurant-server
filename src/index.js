@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const http = require("http");
 const socket = require("socket.io");
+const { addUser, removeUser } = require("./functions/socketFunctions");
 
 dotenv.config({ path: "./src/config/config.env" }); //load env vars
 
@@ -11,7 +12,7 @@ global.io;
 global.onlineUsers = [];
 
 //server setup
-const PORT = process.env.PORT || 8001;
+const PORT = process.env.PORT || 8000;
 
 var server = http.createServer(app);
 server.listen(PORT, () => {
