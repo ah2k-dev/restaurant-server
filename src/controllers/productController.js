@@ -33,14 +33,14 @@ const getProduct = async (req, res) => {
 };
 const createProduct = async (req, res) => {
   try {
-    const { name, price, description, image, category, quantity } = req.body;
+    const { name, price, description, image, category } = req.body;
     const product = await Product.create({
       name,
       price,
       description,
       image,
       category,
-      quantity,
+      // quantity,
       createdBy: req.user._id,
     });
     if (!product)
@@ -55,7 +55,7 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, description, image, category, quantity } = req.body;
+    const { name, price, description, image, category } = req.body;
     const product = await Product.findByIdAndUpdate(
       id,
       {
@@ -64,7 +64,7 @@ const updateProduct = async (req, res) => {
         description,
         image,
         category,
-        quantity,
+        // quantity,
       },
       { new: true }
     );

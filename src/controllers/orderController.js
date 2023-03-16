@@ -6,8 +6,11 @@ const getOrders = async (req, res) => {
   try {
     const orders = await Order.find().populate({
       path: "user",
-      select: "name",
-    });
+      select: "name email",
+    }).populate({
+      path: "products.product",
+      select: "name price",
+    })
     if (!orders)
       return res
         .status(404)
@@ -48,7 +51,11 @@ const getOrder = async (req, res) => {
 const getMyOrders = async (req, res) => {
   try {
     const useerId = req.user._id;
-    const orders = await Order.find({ user: useerId });
+    const orders = await Order.find({ user: useerId }).populate({
+      path: "products.product",
+      select: "name price",
+    });
+
     if (!orders)
       return res
         .status(404)
@@ -76,22 +83,22 @@ const createOrder = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "Order not created" });
-    await Promise.all(
-      products.map(async (item) => {
-        await Product.updateOne(
-          { _id: item.product },
-          { $inc: { quantity: -item.quantity } }
-        );
-      })
-    )
-      .then(() => {
-        return res
-          .status(200)
-          .json({ success: true, order, message: "Order created" });
-      })
-      .catch((error) => {
-        return res.status(500).json({ success: false, message: error.message });
-      });
+    // await Promise.all(
+    //   products.map(async (item) => {
+    //     await Product.updateOne(
+    //       { _id: item.product },
+    //       { $inc: { quantity: -item.quantity } }
+    //     );
+    //   })
+    // )
+    //   .then(() => {
+    return res
+      .status(200)
+      .json({ success: true, order, message: "Order created" });
+    // })
+    // .catch((error) => {
+    //   return res.status(500).json({ success: false, message: error.message });
+    // });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -115,16 +122,20 @@ const updateOrder = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Order payment is pending" });
     }
-    const updated = await Order.findByIdAndUpdate(id, {
-      status: req.body.status,
-      updatedAt: Date.now(),
-    });
+    const updated = await Order.updateOne(
+      { _id: id },
+      {
+        status: req.body.status,
+        updatedAt: Date.now(),
+      }
+    );
     if (!updated)
       return res
         .status(404)
         .json({ success: false, message: "Order not updated" });
     res.status(200).json({ success: true, updated, message: "Order updated" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

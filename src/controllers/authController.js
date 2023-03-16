@@ -78,7 +78,7 @@ const verifyEmail = async (req, res) => {
       });
     }
     if (
-      user.emailVerificationToken !== emailVerificationToken ||
+      user.emailVerificationToken != emailVerificationToken ||
       user.emailVerificationTokenExpires < Date.now()
     ) {
       return res.status(400).json({
@@ -120,6 +120,13 @@ const login = async (req, res) => {
       });
     }
     jwtToken = user.getJWTToken();
+    if (!user.emailVerified) {
+      return res.status(400).json({
+        success: false,
+        message: "Email not verified",
+        emailVerify: true,
+      });
+    }
     delete user.password;
     res.status(200).json({
       success: true,
