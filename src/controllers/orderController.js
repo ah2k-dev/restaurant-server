@@ -1,16 +1,20 @@
 const Product = require("../models/Products/products");
 const Order = require("../models/Products/orders");
 const User = require("../models/User/user");
-
+const stripe = require("stripe")(
+  "sk_test_51MmD7AKWp5Tqj00gEscotVZAU9knx8KK2LBtjc1ExITHnDSMuRkAZMEOx1LZGlRscZVWE4fg9ePsUe7v7Hr5SCqI00A34Yifrb"
+);
 const getOrders = async (req, res) => {
   try {
-    const orders = await Order.find().populate({
-      path: "user",
-      select: "name email",
-    }).populate({
-      path: "products.product",
-      select: "name price",
-    })
+    const orders = await Order.find()
+      .populate({
+        path: "user",
+        select: "name email",
+      })
+      .populate({
+        path: "products.product",
+        select: "name price",
+      });
     if (!orders)
       return res
         .status(404)
@@ -69,7 +73,26 @@ const getMyOrders = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-const pay = async (req, res) => {};
+const pay = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const charge = await stripe.charges.create({
+      amount: req.body.amount,
+      currency: "usd",
+      source: req.body.id,
+      description: id,
+    });
+    if (!charge)
+      return res
+        .status(400)
+        .json({ success: false, message: "Payment failed" });
+    await Order.updateOne({ _id: id }, { status: "pending" });
+    res.send("Payment successful");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Payment failed");
+  }
+};
 const createOrder = async (req, res) => {
   try {
     const { products, shippingAddress, totalPrice } = req.body;
@@ -184,7 +207,7 @@ const cancelOrder = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
+// pk_test_51MmD7AKWp5Tqj00g372akif5TlPohMNRZLW0KOjMgtOT0ygKngAPaRwV88dPn2T6y0eiSjv5eagNkCjvqhkKkCJG00UwbrpTSJ
 module.exports = {
   getOrders,
   getOrder,
